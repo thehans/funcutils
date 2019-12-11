@@ -28,8 +28,9 @@ add = function (x,y) x+y;
 //sub = function (x,y) x-y;
 //mul = function (x,y) x*y;
 //div = function (x,y) x/y;
+//rem = function (x,y) x%y;
 //  return (x modulo y) in range: [0,y-1], always non-negative
-mod = function (x,y) let(r=x%y) r<0 ? r+y : r; 
+mod = function (x,y) let(r=x%y) r<0 ? r+abs(y) : r;
 
 // Boolean
 //not  = function (x) !x;
