@@ -1,29 +1,49 @@
 // Common higher-order functions
-map = function (v, f) [for(x=v) f(x)];
-filter = function (v, pred) [for(x=v) if(pred(x)) x]; 
-fold = function (i, v, f, off = 0) len(v) > off ? fold(f(i, v[off]), v, f, off + 1) : i;
 
+map = function (v, f) [for(x=v) f(x)];
+// Ex:
 //echo(map([1,2,3,4,5,6,7],function(x)x^2));
+
+filter = function (v, pred) [for(x=v) if(pred(x)) x]; 
+// Ex:
 //echo(filter([-2,-1,0,1,2,3,4,5,6,7,8,9],function(x)mod(x,2)==1));
 
-// A few various utility functions:
-//def = function (x,default) is_undef(x)?default:x; // default value
-mod = function (x,y) let(r=x%y) r<0 ? r+y : r;    // return (x modulo y) in range: [0,y-1], always non-negative
-get = function (v,i) v[mod(i,len(v))];            // get element from v with wrapping
+fold = function (i, v, f, off = 0) len(v) > off ? fold(f(i, v[off]), v, f, off + 1) : i;
 
-// Default operators for functions below
+
+// Basic operators for functions below
+//  not sure if commented ones are worth cluttering namespace
+
+// Comparators
 eq = function (x,y) x==y;
+//ne = function (x,y) x!=y;
 lt = function (x,y) x<y;
+//gt = function (x,y) x>y;
+//le = function (x,y) x<=y;
+//ge = function (x,y) x>=y;
+
+// Arithmetic
+//ident = function(x) x;
 add = function (x,y) x+y;
-// not sure if others worth cluttering namespace
-/* 
-gt = function (x,y) x>y;
-le = function (x,y) x<=y;
-ge = function (x,y) x>=y;
-sub = function (x,y) x-y;
-mul = function (x,y) x*y;
-div = function (x,y) x/y;
-//*/
+//sub = function (x,y) x-y;
+//mul = function (x,y) x*y;
+//div = function (x,y) x/y;
+//  return (x modulo y) in range: [0,y-1], always non-negative
+mod = function (x,y) let(r=x%y) r<0 ? r+y : r; 
+
+// Boolean
+//not  = function (x) !x;
+//and  = function (x,y) x&&y;
+//or   = function (x,y) x||y;
+//xor  = function (x,y) (x||y) && !(x&&y);
+//nand = function (x,y) !(x&&y);
+//nor  = function (x,y) !(x||y);
+//xnor = function (x,y) (x&&y) || ((!x)&&(!y)); 
+
+
+// Misc utility functions:
+//def = function (x,default) is_undef(x)?default:x; // default value
+get = function (v,i) v[mod(i,len(v))]; // get element from v with wrapping
 
 
 // *** C++ STL-inspired algorithms, using closest approximate interface where possible ***
@@ -149,7 +169,6 @@ rotr = function (v,l=1) let(i0=mod(-l-1,len(v))) [for(i=[i0+1:1:len(v)-1]) v[i],
 
 // Extract sub-list given begin(inclusive) and end(exclusive). If end not specified, go to end of list
 sublist = function (s,b,e) let(e=is_undef(e) || e > len(s) ? len(s) : e) [for(i=[b:1:e-1]) s[i] ];
-
 
 
 
