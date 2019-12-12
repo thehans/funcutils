@@ -42,9 +42,32 @@ mod = function (x,y) let(r=x%y) r<0 ? r+abs(y) : r;
 //xnor = function (x,y) (x&&y) || ((!x)&&(!y)); 
 
 
-// Misc utility functions:
-//def = function (x,default) is_undef(x)?default:x; // default value
-get = function (v,i) v[mod(i,len(v))]; // get element from v with wrapping
+/* Misc utility functions */
+// default value
+//def = function (x,default) is_undef(x)?default:x;
+// get element from v with wrapping
+get = function (v,i) v[mod(i,len(v))];
+// limit range of values for x between lo and hi
+clamp = function (x,lo,hi) x<lo ? lo : (x>hi ? hi : x);
+
+/* Extra type checks */
+// return true only if x is a range object
+is_range = function (x) !is_list(x) && !is_string(x) && !is_undef(x[0]);
+// return true only if x is the nan value
+is_nan = function (x) !is_function(x) && !is_list(x) && x!=x;
+// return true only if x is a list containing nan, or is itself nan
+has_nan = function (x) !is_function(x) && (let(x=filter(x, function(e) !is_function(e))) x!=x);
+// return true only if x is a list containing a function
+has_function = function(v) is_list(v) && fold(false, v, function(i, x)i||is_function(x));
+// Ex:
+/*
+for (x=[undef,1/0,-1/0,0/0,[],[1,2,3],[1,0/0,2],[1,function(x)x,2],[1,function(x)x,0/0,2],"hi!","",function(x)x,true,false,0,1,-1,[0:-10],[0:1:10],[0:0:0],[0:1:2]]) {
+  if (is_nan(x)) echo(str("is_nan(",x,") = true"));
+  if (has_nan(x)) echo(str("has_nan(",x,") = true"));
+  if (has_function(x)) echo(str("has_function(",x,") = true"));
+  if (is_range(x)) echo(str("is_range(",x,") = true"));
+}
+//*/
 
 
 // *** C++ STL-inspired algorithms, using closest approximate interface where possible ***
@@ -126,12 +149,12 @@ unique = function(v, first=0, last, cmp=eq)
 insert_sorted = function (v,x,cmp=lt)
   insert(v,x,upper_bound(v,x,cmp=cmp));
 
-// insert vector xs into sorted vector v 
+// insert vector xs into sorted vector v
 //   xs does not need to be sorted
-insertv_sorted = function (v,xs,cmp=lt) 
-  let(l=len(xs)) 
-  [for(temp=v, i=0; 
-      i<=l; 
+insertv_sorted = function (v,xs,cmp=lt)
+  let(l=len(xs))
+  [for(temp=v, i=0;
+      i<=l;
       temp=i==l ? temp : insert_sorted(temp,xs[i],cmp),i=i+1)
     if(i==l) temp
   ][0];
@@ -153,7 +176,7 @@ insertv = function (v,i,xs) [for(j=[0:1:i-1]) v[j], for(x=xs) x, for(j=[i:1:len(
 replace = function (v,i,x) [for(j=[0:1:i-1]) v[j], x, for(j=[i+1:1:len(v)-1]) v[j]];
 
 // replace elements of v in range with elements from vector xs
-//    range is vec2 containing [begin,end) indices.  
+//    range is vec2 containing [begin,end) indices.
 //    xs does not need to be same length as range
 replace_range = function (v,range,xs) [for(j=[0:1:range[0]-1]) v[j], for(x=xs) x, for(j=[range[1]+1:1:len(v)-1]) v[j]];
 
@@ -171,6 +194,52 @@ rotr = function (v,l=1) let(i0=mod(-l-1,len(v))) [for(i=[i0+1:1:len(v)-1]) v[i],
 // Extract sub-list given begin(inclusive) and end(exclusive). If end not specified, go to end of list
 sublist = function (s,b,e) let(e=is_undef(e) || e > len(s) ? len(s) : e) [for(i=[b:1:e-1]) s[i] ];
 
+// return a range with begin (inclusive) and end (exclusive) clamped based on len(v)
+// allows negative values to wrap, but only once.
+clamp_range = function (v,begin,step,end)
+  let(
+    l = len(v),
+    s = is_undef(step) ? 1 : assert(step!=0) step,
+    b = is_undef(begin) ? (s<0 ? l+s : 0) : clamp(begin<0?begin+l:begin, 0, l),
+    // subtract step because slice end is exclusive
+    e = is_undef(end) ? (s<0 ? 0 : l-s) : clamp(end<0?end+l:end, 0, l)-s,
+    r = [ b : s : e ]
+  )
+  //echo(str("clamp_range(v,",begin,",",step,",",end,")\tl=",l,"\tr=",r)) // debug
+  r;
+
+// slice params after v are optional
+//   range param overrides others
+//   allow unnamed range to be optionally positioned in place of begin
+slice = function (v, begin, step, end, range)
+  let(r = is_undef(range) ? begin : range)
+  is_range(r) ?
+    [for(i=clamp_range(v,r[0],r[1],r[2])) v[i]] :
+    [for(i=clamp_range(v,begin,step,end)) v[i]];
+// Ex:
+/*
+v = [0,1,2,3,4,5,6,7,8,9];
+echo(slice(v));         // [0,1,2,3,4,5,6,7,8,9]
+echo(slice(v,20));      // []
+echo(slice(v,9));       // [9]
+echo(slice(v,0,2,8));   // [0,2,4,6]
+echo(slice(v,[0:2:8])); // [0,2,4,6]
+echo(slice(v,0,-2,8));  // []
+echo(slice(v,-8));      // [2,3,4,5,6,7,8,9]
+echo(slice(v,-8,-1));   // [2,1,0]
+echo(slice(v,-8,-1,0)); // [2,1]
+echo(slice(v,step=-1)); // [9,8,7,6,5,4,3,2,1,0]
+echo(slice(v,end=2));   // [0,1]
+echo(slice(v,[-1:-1:0]));         // [9,8,7,6,5,4,3,2,1] (warning but works)
+echo(slice(v,begin=1,end=3));     // [1,2]
+echo(slice(v,begin=1,end=0));     // []
+echo(slice([1,2,3,4],step=1/2));  // [1,1,2,2,3,3,4,4] (neat!)
+echo(slice([1,2,3,4],step=-1/2)); // [4,4,3,3,2,2,1,1] (neat!)
+echo(slice(v,begin=1,end=0,step=-1)); // [1]
+echo(slice(v,begin=-20,step=-1,end=-15)); // []
+echo(slice(v,step=0,end=undef,range=[0:2],begin=1/0)); // [0,1] (range override)
+echo(slice(v,step=0)); // Assertion!
+//*/
 
 
 // String-specific functions
@@ -181,20 +250,20 @@ function substr(s,b,e) = let(e=is_undef(e) || e > len(s) ? len(s) : e) (b==e) ? 
 
 //function join(strs, delimiter="", i=0) = (i == len(strs)-1) ? strs[i] : str(strs[i], delimiter, join(strs, delimiter, i+1));
 // binary tree based join, depth of recursion is log_2(n), rather than (n) for naive join
-join = function (l,delimiter="") let(s = len(l)) s > 0 ? 
-  (delimiter=="" ? _jb(l,0,s) : _jbd(l,delimiter,0,s)): 
+join = function (l,delimiter="") let(s = len(l)) s > 0 ?
+  (delimiter=="" ? _jb(l,0,s) : _jbd(l,delimiter,0,s)):
   "";
-// "join binary", splits list into halves and joins them. 
+// "join binary", splits list into halves and joins them.
 // l=list, b=begin(inclusive), e=end(exlusive), s=size, m=midpoint
-function _jb(l,b,e) = let(s = e-b, m=floor(b+s/2)) s > 2 ? 
+function _jb(l,b,e) = let(s = e-b, m=floor(b+s/2)) s > 2 ?
   str(_jb(l,b,m), _jb(l,m,e)) :
-  s == 2 ? 
-    str(l[b],l[b+1]) : 
+  s == 2 ?
+    str(l[b],l[b+1]) :
     l[b];
-function _jbd(l,d,b,e) = let(s = e-b, m=floor(b+s/2)) s > 2 ? 
+function _jbd(l,d,b,e) = let(s = e-b, m=floor(b+s/2)) s > 2 ?
   str(_jbd(l,d,b,m), d, _jbd(l,d,m,e)) :
-  s == 2 ? 
-    str(l[b],d,l[b+1]) : 
+  s == 2 ?
+    str(l[b],d,l[b+1]) :
     l[b];
 
 // add leading zeroes to pad width
