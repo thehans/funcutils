@@ -45,3 +45,7 @@ slice = function (v, begin, step, end, range)
   is_range(r) ?
     [for(i=clamp_range(v,r[0],r[1],r[2])) v[i]] :
     [for(i=clamp_range(v,begin,step,end)) v[i]];
+
+pairs = function(v) len(v) < 2 ? [] :
+  [for (i=[0:len(v)-2]) [v[i], v[i+1]]];
+
