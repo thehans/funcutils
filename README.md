@@ -169,9 +169,18 @@ echo(insertv_sorted([],[for (x=rands(0,10000,10000)) floor(x)]));
 # std.scad
 **Functions modeled after [C++ STL Algorithms](https://en.cppreference.com/w/cpp/algorithm) (incomplete, see [std algorithm status](std_algorithm_status.md) for details)**
 
+:information_source: Where C++ uses `first` and `last` *iterators* for most of the following functions, OpenSCAD uses *indices* of the same name.  This results in some differences between function signatures including:
+ - `v` (for "vector", but may also be a string) is always the first parameter for such OpenSCAD functions
+ - `first=0` is default when omitted
+ - `last=len(v)` is default when omitted
+   - default parameter values cannot depend on previous parameters being initialized in order, so documented function signatures don't explicitely show `last=len(v)`,
+   but it is set within the function body via [end (v, last)](#end)
+ - In some cases, the OpenSCAD version of functions have parameters in a different order than C++
+   - For example C++'s `std::find(first, last, value);` is `find(v, value, first, last)` in OpenSCAD.  `value` comes before `first` and `last` since they can be reasonably defaulted, when `value` can't.
+
 ### Non-modifying sequence operations 
 
- - `end (v,last)`  (ref: [std::end](https://en.cppreference.com/w/cpp/iterator/end), loosely based)
+ - <a name="end"></a>`end (v,last)`  (ref: [std::end](https://en.cppreference.com/w/cpp/iterator/end), loosely based)
    - return `last`, OR length of `v` if `last` not defined.
  - `find_if (v, first=0, last, p)` (ref: [std::find](https://en.cppreference.com/w/cpp/algorithm/find))
   - return index of first element in range `[first,last)` which matches predicate `p`, or `last` if none found.
