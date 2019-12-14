@@ -194,12 +194,20 @@ binary_search = function (v, value, first=0, last=undef, cmp=lt)
 // Minimum/maximum operations
 // **************************
 
-//TODO: max | returns the greater of the given values
-//TODO: max_element | returns the largest element in a range
-//TODO: min | returns the smaller of the given values
-//TODO: min_element | returns the smallest element in a range
-//TODO: minmax | returns the smaller and larger of two elements
-//TODO: minmax_element | returns the smallest and the largest elements in a range
+max = function(a, b, cmp=lt) cmp(a,b) ? b : a;
+max_element = function(v, first=0, last, cmp=lt) let(l = end(v,last),
+  m_e = function (i, m) i < l ? m_e(i+1, cmp(v[m], v[i]) ? i : m) : m)
+  first < l ? m_e(first+1, first) : l;
+
+min = function(a, b, cmp=lt) cmp(b,a) ? b : a;
+min_element = function(v, first=0, last, cmp=lt) let(l = end(v,last),
+  m_e = function (i, m) i < l ? m_e(i+1, cmp(v[i], v[m]) ? i : m) : m)
+  first < l ? m_e(first+1, first) : l;
+
+minmax = function(a, b, cmp=lt) cmp(b,a) ? [b,a] : [a,b];
+minmax_element = function(v, first=0, last, cmp=lt) let(l = end(v,last),
+  mm_e = function (i, mm) i < l ? mm_e(i+1, [cmp(v[i],v[mm[0]]) ? i : mm[0], cmp(v[i],v[mm[1]]) ? mm[1] : i ]) : mm)
+  first < l ? mm_e(first+1, [first,first]) : [l,l];
 
 clamp = function (x,lo,hi,cmp=lt) cmp(x,lo) ? lo : (cmp(hi,x) ? hi : x);
 

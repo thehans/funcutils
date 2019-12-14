@@ -135,12 +135,12 @@ Status      | Description
 
 **Status** | **Function Name** | **Description**
 ---------- | ----------------- | --------------- 
-:white_check_mark: | max | returns the greater of the given values
-:white_check_mark: | max_element | returns the largest element in a range
-:white_check_mark: | min | returns the smaller of the given values
-:white_check_mark: | min_element | returns the smallest element in a range
-:white_check_mark: | minmax | returns the smaller and larger of two elements
-:white_check_mark: | minmax_element | returns the smallest and the largest elements in a range
+:heavy_check_mark: | max | returns the greater of the given values
+:heavy_check_mark: | max_element | returns the largest element in a range
+:heavy_check_mark: | min | returns the smaller of the given values
+:heavy_check_mark: | min_element | returns the smallest element in a range
+:heavy_check_mark: | minmax | returns the smaller and larger of two elements
+:heavy_check_mark: | minmax_element | returns the smallest and the largest elements in a range
 :heavy_check_mark: | clamp | clamps a value between a pair of boundary values
 
 ## Comparison operations
@@ -204,8 +204,8 @@ Status      | Description
 
  | Count | Type                | 
  | -----:| ------------------- |
- |    19 | **DONE**            |
- |    59 | **TODO**            |
+ |    25 | **DONE**            |
+ |    53 | **TODO**            |
  |    26 | **Not Applicable**  |
  |    13 | **Unsure**          |
  |   117 | **Total STL algos** |

@@ -182,9 +182,9 @@ echo(insertv_sorted([],[for (x=rands(0,10000,10000)) floor(x)]));
 
  - <a name="end"></a>`end (v,last)`  (ref: [std::end](https://en.cppreference.com/w/cpp/iterator/end), loosely based)
    - return `last`, OR length of `v` if `last` not defined.
- - `find_if (v, first=0, last, p)` (ref: [std::find](https://en.cppreference.com/w/cpp/algorithm/find))
+ - `find_if (v, first=0, last, p)` (ref: [std::find_if](https://en.cppreference.com/w/cpp/algorithm/find))
   - return index of first element in range `[first,last)` which matches predicate `p`, or `last` if none found.
- - `find_if_not (v, first=0, last, p)` (ref: [std::find](https://en.cppreference.com/w/cpp/algorithm/find))
+ - `find_if_not (v, first=0, last, p)` (ref: [std::find_if_not](https://en.cppreference.com/w/cpp/algorithm/find))
   - return index of first element in range `[first,last)` which does *not* match predicate `p`, or `last` if none found.
  - `find (v, value, first=0, last, cmp=eq)` (ref: [std::find](https://en.cppreference.com/w/cpp/algorithm/find))
    - return index of first element in range `[first,last)` equivalent to `value`, or `last` if none found.
@@ -285,6 +285,54 @@ v = [1, 1, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 6];
 echo(sublist(v,lower_bound(v,4),upper_bound(v,4)));
 echo(binary_search([1,2,3,5,5,8,12],3));
 ```
+
+### Mininum/maximum operations
+
+ - `max (a, b, cmp=lt)` ref: [std::max](https://en.cppreference.com/w/cpp/algorithm/max)
+   - return the greater of the two values.  if equivalent, return `a` 
+   - overrides `max` builtin function, but with customizable comparator
+ - `max_element (v, first=0, last, cmp=lt)` ref: [std::max_element](https://en.cppreference.com/w/cpp/algorithm/max_element)
+   - return index of maximum value in range `[first,last)`, or `last` if empty range
+ - `min (a, b, cmp=lt)` ref: [std::min](https://en.cppreference.com/w/cpp/algorithm/min)
+   - return the lesser of the two values.  if equivalent, return `a` 
+   - overrides `min` builtin function, but with customizable comparator
+ - `min_element (v, first=0, last, cmp=lt)`  ref: [std::min_element](https://en.cppreference.com/w/cpp/algorithm/max_element)
+   - return index of minimum value in range `[first,last)`, or `last` if empty range
+ - `minmax (a, b, cmp=lt)`  ref: [std::minmax](https://en.cppreference.com/w/cpp/algorithm/minmax)
+   - return `[a,b]` when `a <= b` or `[b,a]` when `a > b`
+ - `minmax_element (v, first=0, last, cmp=lt)`  ref: [std::minmax_element](https://en.cppreference.com/w/cpp/algorithm/minmax_element)
+   - return pair of indices `[i,j]` where `v[i]` is minimum element and `v[j]` is maximum in range `[first,last)`, OR `[last,last]` if empty range
+   - if multiple elements are equivalent to the minimum, return first such index for `i`
+   - if multiple elements are equivalent to the maximum, return last such index for `j`
+ - `clamp(x,lo,hi,cmp=lt)` ref [std::clamp](https://en.cppreference.com/w/cpp/algorithm/clamp)
+   - return `lo` if `x` is less than `lo`, or to `hi` if `hi` is less than `x`, otherwise `x`
+```
+// Example compare by index
+echo(max([100,1],[-100,2],function(a,b) a[0]<b[0])); // [100,1]
+echo(max([100,1],[-100,2],function(a,b) a[1]<b[1])); // [-100,2]
+echo(min([100,1],[-100,2],function(a,b) a[0]<b[0])); // [-100,2]
+echo(min([100,1],[-100,2],function(a,b) a[1]<b[1])); // [100,1]
+// return first when "equivalent"
+echo(max([1,2,3],[3,2,1],function(a,b) a[1]<b[1])); // [1,2,3] 
+echo(min([1,2,3],[3,2,1],function(a,b) a[1]<b[1])); // [1,2,3]
+
+v= [0,1,2,3,4,5,6,7,8,9,8,7,6,5,4,3,2,1,0,9];
+echo(min_element(v));    // 0
+echo(min_element(v,10)); // 18
+echo(max_element(v));    // 9
+echo(max_element(v,10)); // 19
+
+lencmp = function (a,b) len(a) < len(b);
+echo(minmax("World!","Hello",lencmp)); // ["Hello", "World!"]
+echo(minmax("Hello","World!",lencmp)); // ["Hello", "World!"]
+// [a,b] stay in-order when equivalent
+echo(minmax("Hello","World",lencmp));  // ["Hello", "World"]
+echo(minmax("world","Hello",lencmp));  // ["World", "Hello"]
+s = "The quick brown fox jumps over the lazy dog";
+x = minmax_element(s);
+echo(x,s[x[0]],s[x[1]]); // [3, 37], " ", "z"
+```
+
 
 ### Numeric operations
 
