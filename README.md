@@ -167,7 +167,7 @@ echo(insertv_sorted([],[for (x=rands(0,10000,10000)) floor(x)]));
 
 <a name="std"></a>
 # std.scad
-**Functions modeled after [C++ STL Algorithms](https://en.cppreference.com/w/cpp/algorithm) (incomplete, see [stl algorithm status](stl_algorithm_status.md) for details)**
+**Functions modeled after [C++ STL Algorithms](https://en.cppreference.com/w/cpp/algorithm) (incomplete, see [std algorithm status](std_algorithm_status.md) for details)**
 
 ### Non-modifying sequence operations 
 
