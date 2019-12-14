@@ -17,7 +17,7 @@ module TestMath() {
 
   Test(vect_range(2, 10, 2), [2, 4, 6, 8, 10]);
   Test(vect_range(2, 2, 5), [2]);
-  Test(vect_range(3, -3, -1) [3, 2, 1, 0, -1, -2, -3])
+  Test(vect_range(3, -3, -1), [3, 2, 1, 0, -1, -2, -3]);
 }
 
 TestMath();
