@@ -18,3 +18,6 @@ sum = function(v, first=0, last=undef) let(
   )
   _sum_rec(v, first, last_int);
 
+vect_range = function(first, last, step=1)
+  [for (i=[first:last:step] i]
+

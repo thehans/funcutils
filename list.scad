@@ -49,3 +49,24 @@ slice = function (v, begin, step, end, range)
 pairs = function(v) len(v) < 2 ? [] :
   [for (i=[0:len(v)-2]) [v[i], v[i+1]]];
 
+zip = function(v1, v2) let(
+    last = min(len(v1), len(v2))-1
+  )
+  last < 0 ? [] :
+  [for (i=[0:last]) [v1[i], v2[i]]];
+
+zip3 = function(v1, v2, v3) let(
+    last = min(min(len(v1), len(v2)), len(v3))-1
+  )
+  last < 0 ? [] :
+  [for (i=[0:last]) [v1[i], v2[i], v3[i]]];
+
+zip4 = function(v1, v2, v3, v4) let(
+    last = min(min(len(v1), len(v2)), min(len(v3), len(v4)))-1
+  )
+  last < 0 ? [] :
+  [for (i=[0:last]) [v1[i], v2[i], v3[i], v4[i]]];
+
+select_mask = function(v, mask)
+  [for (p=zip(v, mask)) if (p[1]) p[0]];
+
