@@ -28,6 +28,11 @@ module TestList() {
   Test(slice(v,begin=-20,step=-1,end=-15),  []);
   Test(slice(v,step=0,end=undef,range=[0:2],begin=1/0), [0,1]); // (range override)
   // echo(slice(v,step=0)); // assertion!
+
+  Test(pairs([0,1,2,3,4]), [[0,1],[1,2],[2,3],[3,4]]);
+  Test(pairs([0,1]), [[0,1]]);
+  Test(pairs([0]), []);
+  Test(pairs([]), []);
 }
 
 TestList();
