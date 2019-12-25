@@ -218,6 +218,23 @@ echo(contains([6,4,7,-8,4,3,5,-6,5,3,2,1,10,0,-1],3.14));
 echo(contains([6,4,7,-8,4,3,5,-6,5,3,2,1,10,0,-1],-1));
 ```
 
+ - `count (v, value, first=0, last, cmp=eq)` ref: [std::count](https://en.cppreference.com/w/cpp/algorithm/count)
+   - return the number of elements in the range `[first, last)` equal to `value`
+ - `count_if (v, p, first=0, last)` ref: [std::count_if](https://en.cppreference.com/w/cpp/algorithm/count)
+   - return the number of elements in the range `[first, last)` for which predicate `p` returns `true`
+ - `mismatch (v1, first1=0, last1, v2, first2=0, last2, cmp=eq)` ref: [std::mismatch](https://en.cppreference.com/w/cpp/algorithm/mismatch)
+   - return pair of indices `[i1,i2]` to the first two non-equal elements.
+   - if no mismatches are found when the comparison reaches `last1` or `last2`, whichever happens first, the pair holds the end index and the corresponding index from the other range.
+```
+echo(count("this is a test","t"));
+echo(count_if([1,2,3,4,5,6,7,8,9,10],p=function(x)x>3));
+echo(mismatch(v1="oh! hi, how are you?",first1=4,v2="hi, how's it going?"));// [11, 7]
+echo(mismatch(v1="Hello World",v2="Hello World"));// [11, 11]
+echo(mismatch(v1="Hello!",v2="Hello"));           // [5, 5]
+echo(mismatch(v1="l",v2="Hello",first2=3));       // [1, 4]
+```
+
+
 ### Modifying sequence operations
 
  - `remove(v,first=0,last)` ref: [std::remove](https://en.cppreference.com/w/cpp/algorithm/remove)

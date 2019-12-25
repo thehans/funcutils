@@ -5,100 +5,225 @@ include <ops.scad>
 
 
 // *********************************
-// Non-modifying sequence operations 
+// Non-modifying sequence operations
 // *********************************
 
-end = function (v,last) is_undef(last) ? len(v) : last;
+end = function (v, last)
+  is_undef(last) ? len(v) : last;
 
-find_if = function (v,first=0,last,p)
+all_of = function (v, p, first=0, last)
+  let(l=end(v,last))
+  find_if_not(v,p,first,l)==l;
+
+any_of = function (v, p, first=0, last)
+  let(l=end(v,last))
+  find_if(v,p,first,l)!=l;
+
+none_of = function (v, p, first=0, last)
+  let(l=end(v,last))
+  find_if(v,p,first,l)==l;
+
+// As a "non-modifying" function, for_each just returns f rather than a new vector.
+// Use std "transform" or general functional "map" for that.
+// As such, for_each function probably only useful for echos and asserts.
+for_each = function(v, f, first=0, last)
+  let(l=end(v,last),dummy2=[for(i=[first:1:l-1]) let(dummy1=f(v[i])) if(false) undef])
+  f;
+
+// similar to for_each but returns (first+n)
+for_each_n = function(v, f, first=0, n)
+  let(dummy2=[for(i=[first:1:first+n-1]) let(dummy1=f(v[i])) if(false) undef])
+  first+n;
+
+// for_each[_n] module maybe slightly more useful, putting result of f into $each variable,
+// which may be used by children
+module for_each(v, f, first=0, last) {
+  let(l=end(v,last))
+    for(i=[first:1:l-1]) let($each=f(v[i])) children();
+}
+module for_each_n(v, f, first=0, n) {
+  for(i=[first:1:first+n-1]) let($each=f(v[i])) children();
+}
+
+count = function (v, value, first=0, last, cmp=eq)
+  accumulate(v,first,last,0,function(a,b) eq(b,value) ? a+1 : a);
+
+count_if = function (v, p, first=0, last)
+  accumulate(v,first,last,0,function(a,b) p(b) ? a+1 : a);
+
+mismatch = function (v1, first1=0, last1, v2, first2=0, last2, cmp=eq)
+  let(l1 = end(v1,last1), l2 =  end(v2,last2),
+    imax = min(l1-first1, l2-first2),
+    f=function (i) (i>=imax || !cmp(v1[first1+i],v2[first2+i])) ? (i<imax ? [first1+i,first2+i] : [first1+imax,first2+imax]) : f(i+1) )
+  assert(first1<=l1) assert(first2<=l2)
+  f(0);
+
+contains = function (v, value, first=0, last, cmp=eq)
+  let(l=end(v,last))
+  find(v,value,first,l,cmp)!=l;
+
+find_if = function (v, p, first=0, last)
   let(l=end(v,last), f=function (i) (i>=l || p(v[i])) ? (i<l ? i : l) : f(i+1))
   f(first);
-find_if_not = function (v,first=0,last,p)
+
+find_if_not = function (v, p, first=0, last)
   let(l=end(v,last), f=function (i) (i>=l || !p(v[i])) ? (i<l ? i : l) : f(i+1))
   f(first);
+
 find = function(v, value, first=0, last, cmp=eq)
-  find_if(v,first,last,function(x)cmp(value,x));
+  find_if(v,function(x)cmp(value,x),first,last);
 
-all_of = function (v,first=0,last,p) let(l=end(v,last)) find_if_not(v,first,l,p)==l;
-any_of = function (v,first=0,last,p) let(l=end(v,last)) find_if(v,first,l,p)!=l;
-none_of = function (v,first=0,last,p) let(l=end(v,last)) find_if(v,first,l,p)==l;
+find_end = function(v, s_v, first=0, last, s_first=0, s_last, cmp=eq)
+  let( l=end(v,last), sl=end(s_v,s_last)-1,
+    _f=function(i, j) (j < s_first ? i+1 : (i < first ? l :
+      (cmp(v[i],s_v[j]) ? _f(i-1,j-1) : _f(i+sl-j-1, sl)))) )
+  _f(l-1, sl);
 
-//TODO: for_each   |
-//TODO: for_each_n | applies a function object to the first n elements of a sequence
-//TODO: count
-//TODO: count_if | returns the number of elements satisfying specific criteria
-//TODO: mismatch | finds the first position where two ranges differ
+find_first_of = function(v, s_v, first=0, last, s_first=0, s_last, cmp=eq)
+  find_if(v,function(x)contains(s_v,x,s_first,s_last),first,last);
 
-contains = function (v,value,first,last,cmp=eq) let(l=end(v,last)) find(v,value,first,l,cmp)!=l;
+adjacent_find = function(v, first=0, last, cmp=eq)
+  let( l=end(v,last), _a=function(f) l-f>1 && !cmp(v[f],v[f+1]) ? _a(f+1) : (l-f>1 ? f : l) )
+  _a(first);
 
-//TODO: find_end | finds the last sequence of elements in a certain range
-//TODO: find_first_of | searches for any one of a set of elements
-//TODO: adjacent_find | finds the first two adjacent items that are equal (or satisfy a given predicate)
-//TODO: search | searches for a range of elements
-//TODO: search_n | searches a range for a number of consecutive copies of an element
+std_search = function(v, s_v, first=0, last, s_first=0, s_last, cmp=eq)
+  let(f=s_first, l=end(v,last), sl=end(s_v,s_last), d=sl-f,
+    _s=function(i, j) (j >= sl ? i - d : (i == l ? l :
+      (cmp(v[i],s_v[j]) ? _s(i+1,j+1) : _s(i+f-j+1, f)))))
+  _s(first, s_first);
 
+search_n = function(v, count, value, first=0, last, cmp=eq)
+  let(l=end(v,last), _s=function(i,j) (j>=count ? i-count : (i == l ? l :
+    (cmp(v[i],value) ? _s(i+1,j+1) : _s(i+1,0) ))))
+  _s(first,0);
 
 // *****************************
 // Modifying sequence operations
 // *****************************
 
-//TODO: copy
-//TODO: copy_if | copies a range of elements to a new location
-//TODO: copy_n | copies a number of elements to a new location
-//TODO: copy_backward | copies a range of elements in backwards order
+copy = function(v, first=0, last, d=[], d_first=0)
+  let(l=end(v,last))
+  [ for(i=[0:1:d_first-1]) d[i],
+    for(i=[first:1:l-1]) v[i],
+    for(i=[d_first+l-first:1:end(d)-1]) d[i] ];
+
+copy_if = function(v, p, first=0, last, d=[], d_first=0)
+  let(l=end(v,last), dl=end(d))
+  [ for(i=[0:1:d_first-1]) d[i],
+    for(i=first, j=d_first, t=i<l ? p(v[i]) : false;
+        j < dl-d_first || i < l;
+        i=i+1, j=(t || i>=l) ? j+1 : j, t=i<l ? p(v[i]) : false)
+      if(t || i>=l) t ? v[i] : d[j] ];
+
+copy_n = function(v, count, first=0, d=[], d_first=0)
+  copy(v, first, first+count, d, d_first);
+
+//(N/A) copy_backward | copies a range of elements in backwards order
 //(N/A) move | moves a range of elements to a new location
 //(N/A) move_backward | moves a range of elements to a new location in backwards order
-//TODO: fill | copy-assigns the given value to every element in a range
-//TODO: fill_n | copy-assigns the given value to N elements in a range
-//TODO: transform | applies a function to a range of elements, storing results in a destination range
-//TODO: generate | assigns the results of successive function calls to every element in a range
-//TODO: generate_n | assigns the results of successive function calls to N elements in a range
 
-remove = function (v,first=0,last) let(l=end(v,last)) [
-  for(j=[0:1:first-1]) v[j], 
-  for(j=[last:1:len(v)-1]) v[j]
-];
-remove_if = function (v,first=0,last,p) let(l=end(v,last)) [
-  for(i=[0:1:l-1]) if(!p(v[i])) v[i]];
+fill = function(v=[], value, first=0, last)
+  let(l=end(v,last))
+  [ for(i=[0:1:first-1]) v[i],
+    for(i=[first:1:l-1]) value,
+    for(i=[l:1:end(v)-1]) v[i] ];
 
-//(N/A) remove_copy
-//(N/A) remove_copy_if | copies a range of elements omitting those that satisfy specific criteria
+fill_n = function(v=[], count, value, first=0)
+  [ for(i=[0:1:first-1]) v[i],
+    for(i=[1:1:count]) value,
+    for(i=[first+count:1:end(v)-1]) v[i] ];
 
-replace = function (v,old_value,new_value,first=0,last,cmp=eq) let(l=end(v,last))
-  [for(i=[first:1:l-1]) cmp(v[i],old_value) ? new_value : v[i] ];
-replace_if = function (v,new_value,first=0,last,p) let(l=end(v,last))
-  [for(i=[first:1:l-1]) p(v[i]) ? new_value : v[i] ];
+transform = function(v1, unary_op, first1=0, last1, d=[], d_first=0)
+  let(l1=end(v1,last1))
+  [ for(i=[0:1:d_first1-1]) d[i],
+    for(i=[first1:1:l1]) unary_op(v1[i]),
+    for(i=[d_first+l1-first1:1:end(d)-1]) d[i] ];
 
-//(N/A) replace_copy
-//(N/A) replace_copy_if | copies a range, replacing elements satisfying specific criteria with another value
+transform2 = function(v1, v2, binary_op, first1=0, last1, first2=0, d=[], d_first=0)
+  let(l1=end(v1,last1))
+  [ for(i=[0:1:d_first1-1]) d[i],
+    for(i=[0:1:l1-first1-1]) binary_op(v1[first1+i],v2[first2+i]),
+    for(i=[d_first+l1-first1:1:end(d)-1]) d[i] ];
+
+generate = function(g, v=[], first=0, last)
+  let(l=end(v,last))
+  [ for(i=[0:1:first-1])
+    for(i=[first:1:l-1]) g(),
+    for(i=[l:1:end(v)-1]) v[i] ];
+
+generate_n = function(count, g, v=[], first=0)
+  [ for(i=[0:1:first-1]) v[i],
+    for(i=[1:1:count]) g(),
+    for(i=[first+count:1:end(v)-1]) v[i] ];
+
+remove = function (v, value, first=0, last, cmp=eq)
+  let(l=end(v,last))
+  [ for(i=[0:1:first-1]) v[i],
+    for(i=[first:1:l-1]) if(!cmp(v[i],value)) v[i],
+    for(i=[l:1:len(v)-1]) v[i] ];
+
+remove_if = function (v, p, first=0, last)
+  [ for(i=[0:1:end(v,last)-1]) if(!p(v[i])) v[i] ];
+
+remove_copy = function (v, value, first=0, last, d=[], d_first=0, cmp=eq)
+  copy_if(v, function(x)!cmp(x,value), first, last, d, d_first);
+
+remove_copy_if = function(v, p, first=0, last, d=[], d_first=0)
+  copy_if(v, function(x)!p(x), first, last, d, d_first);
+
+replace = function (v, old_value, new_value, first=0, last, cmp=eq)
+  [ for(i=[first:1:end(v,last)-1]) cmp(v[i],old_value) ? new_value : v[i] ];
+
+replace_if = function (v, p, new_value, first=0, last)
+  [ for(i=[first:1:end(v,last)-1]) p(v[i]) ? new_value : v[i] ];
+
+replace_copy = function (v, old_value, new_value, first=0, last, d=[], d_first=0, cmp=eq)
+  let(l=end(v,last))
+  [ for(i=[0:1:d_first-1]) d[i],
+    for(i=[first:1:l-1]) cmp(old_value, v[i]) ? new_value : v[i],
+    for(i=[d_first+l-first:1:end(d)-1]) d[i] ];
+
+replace_copy_if = function (v, p, new_value, first=0, last, d=[])
+  let(l=end(v,last))
+  [ for(i=[0:1:d_first-1]) d[i],
+    for(i=[first:1:l-1]) p(v[i]) ? new_value : v[i],
+    for(i=[d_first+l-first:1:end(d)-1]) d[i] ];
+
 //(Unsure) swap | swaps the values of two objects
 //(Unsure) swap_ranges | swaps two ranges of elements
 //(Unsure) iter_swap | swaps the elements pointed to by two iterators
 
-reverse = function (v,first=0,last) let(l=end(v,last)) [
-  for(i=[0:1:first-1]) v[i],
-  for(i=[l-1:-1:first]) v[i],
-  for(i=[l:1:len(v)-1]) v[i]
-];
+reverse = function (v, first=0, last)
+  let(l=end(v,last))
+  [ for(i=[0:1:first-1]) v[i],
+    for(i=[l-1:-1:first]) v[i],
+    for(i=[l:1:len(v)-1]) v[i] ];
 
-//(N/A) reverse_copy | creates a copy of a range that is reversed
+reverse_copy = function (v, d, first=0, last, d_first)
+  let(l=end(v,last))
+  [ for(i=[0:1:d_first-1]) d[i],
+    for(i=[l-1:-1:first]) v[i],
+    for(i=[d_first+l-first:1:len(d)-1]) d[i] ];
 
-std_rotate = function(v,first=0,first_n,last) let(l=end(v,last)) [
-  for(i=[0:1:first-1]) v[i], 
-  for(i=[first_n:1:l-1]) v[i], 
-  for(i=[first:1:first_n-1]) v[i],
-  for(i=[l:1:len(v)-1]) v[i]
-];
+std_rotate = function(v, first=0, first_n, last)
+  let(l=end(v,last))
+  [ for(i=[0:1:first-1]) v[i],
+    for(i=[first_n:1:l-1]) v[i],
+    for(i=[first:1:first_n-1]) v[i],
+    for(i=[l:1:len(v)-1]) v[i] ];
 
-//(N/A) rotate_copy | copies and rotate a range of elements
+//TODO: rotate_copy | copies and rotate a range of elements
+
+
 //TODO: shift_left
 //TODO: shift_right | shifts elements in a range
 //TODO: random_shuffle
 //TODO: shuffle | randomly re-orders elements in a range
 //TODO: sample | selects n random elements from a sequence
 
-unique = function(v, first=0, last, cmp=eq) let(l=end(v,last))
-  [for(prev=undef, i=first, cur=v[i]; i<l; prev=cur, i=i+1, cur=v[i]) if(!eq(prev,cur)) cur];
+unique = function(v, first=0, last, cmp=eq)
+  let(l=end(v,last))
+  [ for(prev=undef, i=first, cur=v[i]; i<l; prev=cur, i=i+1, cur=v[i]) if(!eq(prev,cur)) cur ];
 
 //(N/A) unique_copy | creates a copy of some range of elements that contains no consecutive duplicates
 
@@ -109,12 +234,12 @@ unique = function(v, first=0, last, cmp=eq) let(l=end(v,last))
 
 //TODO: is_partitioned | determines if the range is partitioned by the given predicate
 
-stable_partition = function(v,first=0,last,p) let(l=end(v,last)) [
-  for(i=[0:1:first-1]) v[i], 
-  for(i=[first:1:l-1]) if(p(v[i])) v[i], 
-  for(i=[first:1:l-1]) if(!p(v[i])) v[i],
-  for(i=[l:1:len(v)-1]) v[i]
-];
+stable_partition = function(v, first=0, last, p)
+  let(l=end(v,last))
+  [ for(i=[0:1:first-1]) v[i],
+    for(i=[first:1:l-1]) if(p(v[i])) v[i],
+    for(i=[first:1:l-1]) if(!p(v[i])) v[i],
+    for(i=[l:1:len(v)-1]) v[i] ];
 
 //(N/A) partition_copy | copies a range dividing the elements into two groups
 //(N/A) stable_partition | divides elements into two groups while preserving their relative order
@@ -138,23 +263,23 @@ stable_partition = function(v,first=0,last,p) let(l=end(v,last)) [
 // Binary search operations (on sorted ranges)
 // *******************************************
 
-upper_bound = function (v, value, first=0, last=undef, cmp=lt)
+upper_bound = function (v, value, first=0, last, cmp=lt)
   let(ub = function(b,e)
-      let(m=floor((b+e)/2)) e-b > 1 ?
-        cmp(value,v[m]) ? ub(b,m) : ub(m,e) :
-        cmp(value,v[m]) ? m : e) 
-  ub(first,end(v,last));
-
-lower_bound = function (v, value, first=0, last=undef, cmp=lt)
-  let(lb = function(b,e) //echo(v,x,b,e)
     let(m=floor((b+e)/2)) e-b > 1 ?
-      cmp(v[m],value) ? lb(m,e) : lb(b,m) :
-      cmp(v[m],value) ? e : m) 
-  lb(first, end(v,last));
+      cmp(value, v[m]) ? ub(b, m) : ub(m, e) :
+      cmp(value, v[m]) ? m : e)
+  ub(first, end(v,last));
 
-binary_search = function (v, value, first=0, last=undef, cmp=lt)
-  let(last = end(v,last), first = lower_bound(v, value, first, last, cmp))
-  !(first == last) && !cmp(value, v[first]);
+lower_bound = function (v, value, first=0, last, cmp=lt)
+  let(lb = function(b,e)
+    let(m=floor((b+e)/2)) e-b > 1 ?
+      cmp(v[m], value) ? lb(m,e) : lb(b,m) :
+      cmp(v[m], value) ? e : m)
+  lb(first, end(v, last));
+
+binary_search = function (v, value, first=0, last, cmp=lt)
+  let(l=end(v,last), f=lower_bound(v, value, first, l, cmp))
+  !(f == l) && !cmp(value, v[f]);
 
 //TODO: equal_range | returns range of elements matching a specific key
 
@@ -194,22 +319,31 @@ binary_search = function (v, value, first=0, last=undef, cmp=lt)
 // Minimum/maximum operations
 // **************************
 
-max = function(a, b, cmp=lt) cmp(a,b) ? b : a;
-max_element = function(v, first=0, last, cmp=lt) let(l = end(v,last),
-  m_e = function (i, m) i < l ? m_e(i+1, cmp(v[m], v[i]) ? i : m) : m)
+max = function(a, b, cmp=lt)
+  cmp(a,b) ? b : a;
+
+max_element = function(v, first=0, last, cmp=lt)
+  let(l = end(v,last),
+    m_e = function (i, m) i < l ? m_e(i+1, cmp(v[m], v[i]) ? i : m) : m)
   first < l ? m_e(first+1, first) : l;
 
-min = function(a, b, cmp=lt) cmp(b,a) ? b : a;
-min_element = function(v, first=0, last, cmp=lt) let(l = end(v,last),
+min = function(a, b, cmp=lt)
+  cmp(b,a) ? b : a;
+
+min_element = function(v, first=0, last, cmp=lt)
+  let(l = end(v,last),
   m_e = function (i, m) i < l ? m_e(i+1, cmp(v[i], v[m]) ? i : m) : m)
   first < l ? m_e(first+1, first) : l;
 
-minmax = function(a, b, cmp=lt) cmp(b,a) ? [b,a] : [a,b];
+minmax = function(a, b, cmp=lt)
+  cmp(b,a) ? [b,a] : [a,b];
+
 minmax_element = function(v, first=0, last, cmp=lt) let(l = end(v,last),
   mm_e = function (i, mm) i < l ? mm_e(i+1, [cmp(v[i],v[mm[0]]) ? i : mm[0], cmp(v[i],v[mm[1]]) ? mm[1] : i ]) : mm)
   first < l ? mm_e(first+1, [first,first]) : [l,l];
 
-clamp = function (x,lo,hi,cmp=lt) cmp(x,lo) ? lo : (cmp(hi,x) ? hi : x);
+clamp = function (x,lo,hi,cmp=lt)
+  cmp(x,lo) ? lo : (cmp(hi,x) ? hi : x);
 
 
 // *********************
@@ -234,16 +368,22 @@ clamp = function (x,lo,hi,cmp=lt) cmp(x,lo) ? lo : (cmp(hi,x) ? hi : x);
 // Numeric operations
 // ******************
 
-//TODO: iota
+iota = function(v=[], value, first=0, last, inc=inc)
+  let(l=end(v,last))
+  [ for(i=[0:1:first-1]) v[i],
+    for(i=first, x=value; i<l; i=i+1, x=inc(x)) x ];
 
-accumulate = function (v, first=0, last=undef, init=0, op=add)
-  let(l=end(v,last), a = function(f,acc) f<l ? a(f+1,op(acc,v[f])) : acc)
+accumulate = function (v, first=0, last, init=0, op=add)
+  let(l=end(v,last), a = function(i,acc) i<l ? a(i+1,op(acc,v[i])) : acc)
   a(first,init);
 
 //TODO: inner_product
 //TODO: adjacent_difference
+
 //TODO: partial_sum
-//(N/A) reduce 
+
+
+//(N/A) reduce
 //TODO: exclusive_scan
 //TODO: inclusive_scan
 //TODO: transform_reduce
@@ -274,5 +414,5 @@ accumulate = function (v, first=0, last=undef, init=0, op=add)
 // C library
 // *********
 
-//(Unsure) qsort 
+//(Unsure) qsort
 //(Unsure) bsearch

@@ -16,61 +16,63 @@ Status      | Description
 
 **Status** | **Function Name** | **Description**
 ---------- | ----------------- | --------------- 
+:heavy_plus_sign: | end | returns last or len(v) if last undefined, similar to container::end() iterator.
 :heavy_check_mark: | all_of   | checks if a predicate is true for all of the elements in a range
 :heavy_check_mark: | any_of   | checks if a predicate is true for any of the elements in a range
 :heavy_check_mark: | none_of  | checks if a predicate is true for none of the elements in a range
-:white_check_mark: | for_each   |
-:white_check_mark: | for_each_n | applies a function object to the first n elements of a sequence
-:white_check_mark: | count
-:white_check_mark: | count_if | returns the number of elements satisfying specific criteria
-:white_check_mark: | mismatch | finds the first position where two ranges differ
+:heavy_check_mark: | for_each   |
+:heavy_check_mark: | for_each_n | applies a function object to the first n elements of a sequence
+:heavy_check_mark: | count
+:heavy_check_mark: | count_if | returns the number of elements satisfying specific criteria
+:heavy_check_mark: | mismatch | finds the first position where two ranges differ
 :heavy_check_mark: | find
 :heavy_check_mark: | find_if
 :heavy_check_mark: | find_if_not | finds the first element satisfying specific criteria
 :heavy_plus_sign: | contains | like find, but return boolean instead of index
-:white_check_mark: | find_end | finds the last sequence of elements in a certain range
-:white_check_mark: | find_first_of | searches for any one of a set of elements
-:white_check_mark: | adjacent_find | finds the first two adjacent items that are equal (or satisfy a given predicate)
-:white_check_mark: | search | searches for a range of elements
-:white_check_mark: | search_n | searches a range for a number of consecutive copies of an element
+:heavy_check_mark: | find_end | finds the last sequence of elements in a certain range
+:heavy_check_mark: | find_first_of | searches for any one of a set of elements
+:heavy_check_mark: | adjacent_find | finds the first two adjacent items that are equal (or satisfy a given predicate)
+:heavy_check_mark: | search | searches for a range of elements
+:heavy_check_mark: | search_n | searches a range for a number of consecutive copies of an element
 
 ## Modifying sequence operations
 
 **Status** | **Function Name** | **Description**
 ---------- | ----------------- | --------------- 
-:white_check_mark: | copy
-:white_check_mark: | copy_if | copies a range of elements to a new location
-:white_check_mark: | copy_n | copies a number of elements to a new location
-:white_check_mark: | copy_backward | copies a range of elements in backwards order
+:heavy_check_mark: | copy
+:heavy_check_mark: | copy_if | copies a range of elements to a new location
+:heavy_check_mark: | copy_n | copies a number of elements to a new location
+:x: | copy_backward | copies a range of elements in backwards order
 :x:<sup>[1](#note1)</sup> | move | moves a range of elements to a new location
 :x:<sup>[1](#note1)</sup> | move_backward | moves a range of elements to a new location in backwards order
-:white_check_mark: | fill | copy-assigns the given value to every element in a range
-:white_check_mark: | fill_n | copy-assigns the given value to N elements in a range
-:white_check_mark: | transform | applies a function to a range of elements, storing results in a destination range
-:white_check_mark: | generate | assigns the results of successive function calls to every element in a range
-:white_check_mark: | generate_n | assigns the results of successive function calls to N elements in a range
+:heavy_check_mark: | fill | copy-assigns the given value to every element in a range
+:heavy_check_mark: | fill_n | copy-assigns the given value to N elements in a range
+:heavy_check_mark: | transform | applies a function to a range of elements, storing results in a destination range
+:heavy_plus_sign: | transform2 | applies a function to a range of elements, storing results in a destination range
+:heavy_check_mark: | generate | assigns the results of successive function calls to every element in a range
+:heavy_check_mark: | generate_n | assigns the results of successive function calls to N elements in a range
 :heavy_check_mark: | remove
 :heavy_check_mark: | remove_if | removes elements satisfying specific criteria
-:x:<sup>[1](#note1)</sup> | remove_copy
-:x:<sup>[1](#note1)</sup> | remove_copy_if | copies a range of elements omitting those that satisfy specific criteria
+:heavy_check_mark: | remove_copy
+:heavy_check_mark: | remove_copy_if | copies a range of elements omitting those that satisfy specific criteria
 :heavy_check_mark: | replace
 :heavy_check_mark: | replace_if | replaces all values satisfying specific criteria with another value
-:x:<sup>[1](#note1)</sup> | replace_copy
-:x:<sup>[1](#note1)</sup> | replace_copy_if | copies a range, replacing elements satisfying specific criteria with another value
+:heavy_check_mark: | replace_copy
+:heavy_check_mark: | replace_copy_if | copies a range, replacing elements satisfying specific criteria with another value
 :question: | swap | swaps the values of two objects
 :question: | swap_ranges | swaps two ranges of elements
 :question: | iter_swap | swaps the elements pointed to by two iterators
 :heavy_check_mark: | reverse | reverses the order of elements in a range
-:x:<sup>[1](#note1)</sup> | reverse_copy | creates a copy of a range that is reversed
+:heavy_check_mark: | reverse_copy | creates a copy of a range that is reversed
 :heavy_check_mark: | rotate | rotates the order of elements in a range
-:x:<sup>[1](#note1)</sup> | rotate_copy | copies and rotate a range of elements
+:white_check_mark: | rotate_copy | copies and rotate a range of elements
 :white_check_mark: | shift_left
 :white_check_mark: | shift_right | shifts elements in a range
 :white_check_mark: | random_shuffle
 :white_check_mark: | shuffle | randomly re-orders elements in a range
 :white_check_mark: | sample | selects n random elements from a sequence
 :heavy_check_mark: | unique | removes consecutive duplicate elements in a range
-:x:<sup>[1](#note1)</sup> | unique_copy | creates a copy of some range of elements that contains no consecutive duplicates
+:white_check_mark: | unique_copy | creates a copy of some range of elements that contains no consecutive duplicates
 
 ## Partitioning operations
 
@@ -78,7 +80,7 @@ Status      | Description
 ---------- | ----------------- | --------------- 
 :white_check_mark: | is_partitioned | determines if the range is partitioned by the given predicate
 :heavy_check_mark: | partition | divides a range of elements into two groups
-:x:<sup>[1](#note1)</sup> | partition_copy | copies a range dividing the elements into two groups
+:white_check_mark: | partition_copy | copies a range dividing the elements into two groups
 :x:<sup>[2](#note2)</sup> | stable_partition | divides elements into two groups while preserving their relative order
 :white_check_mark: | partition_point | locates the partition point of a partitioned range
 
@@ -90,7 +92,7 @@ Status      | Description
 :white_check_mark: | is_sorted_until | finds the largest sorted subrange
 :white_check_mark: | sort | sorts a range into ascending order
 :white_check_mark: | partial_sort | sorts the first N elements of a range
-:x:<sup>[1](#note1)</sup> | partial_sort_copy | copies and partially sorts a range of elements
+:white_check_mark: | partial_sort_copy | copies and partially sorts a range of elements
 :question:<sup>[2](#note2)</sup> | stable_sort | sorts a range of elements while preserving order between equal elements
 :white_check_mark: | nth_element | partially sorts the given range making sure that it is partitioned by the given element
 
@@ -204,12 +206,12 @@ Status      | Description
 
  | Count | Type                | 
  | -----:| ------------------- |
- |    25 | **DONE**            |
- |    53 | **TODO**            |
- |    26 | **Not Applicable**  |
+ |    48 | **DONE**            |
+ |    38 | **TODO**            |
+ |    18 | **Not Applicable**  |
  |    13 | **Unsure**          |
  |   117 | **Total STL algos** |
- |     1 | **Bonus**           |
+ |     3 | **Bonus**           |
 
 ### <a name="notes"></a>Notes
 
