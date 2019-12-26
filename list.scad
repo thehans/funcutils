@@ -1,6 +1,6 @@
 include <types.scad>
-include <std.scad>
-//  Dependencies included by std.scad:
+include <std_algorithm.scad>
+//  Dependencies included by std_algorithm.scad:
 //    include <ops.scad>
 
 // Various list-based functions which are *not* directly modeled after C++ STL algorithms.

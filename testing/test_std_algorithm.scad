@@ -1,9 +1,11 @@
-include <../list.scad> // needed for insertv_sorted  (list.scad includes std.scad)
+include <../list.scad> // needed for insertv_sorted  (list.scad includes std_algorithm.scad)
 include <utils_testing.scad>
 
-// TODO update README example code based on interface changes made since testing
+// TODO update README for newly added std functions and interface changes made since testing
+// TODO various algorithms with hastily written implementation NOT YET TESTED at all
 
 module TestStdAlgorithm() {
+  echo("Testing std_algorithm.scad");
 
   // end (v,last)
   let(v=[6,4,7,-8,4,3,5,-6,5,3,2,1,10,0,-1]) {
@@ -123,8 +125,6 @@ module TestStdAlgorithm() {
     Test(adjacent_find(bin), 1);
     Test(adjacent_find(bin, 2), 8);
 
-    //assert(false);
-
     // std_search (v, s_v, first=0, last, s_first=0, s_last, cmp=eq) 
     Test(std_search(buf, "Buffalo"), 0);
     Test(std_search(buf, "buffalo"), 8);
@@ -161,6 +161,9 @@ module TestStdAlgorithm() {
     Test(copy_n(v,7,0,[10,11,12,13,14,15,16,17,18,19]),[0,1,2,3,4,5,6,17,18,19]);
     Test(copy_n(v,7,0,[10,11,12],2),[10,11,0,1,2,3,4,5,6]);
   
+    // TODO
+    // copy_backward = function(v, first=0, last, d=[], d_last)
+  
     Test(fill([],-1,0,5),[-1,-1,-1,-1,-1]);
     Test(fill(v,-1,0,5),[-1,-1,-1,-1,-1,5,6,7,8,9]);
     Test(fill(v,-1,5,10),[0,1,2,3,4,-1,-1,-1,-1,-1]);
@@ -175,7 +178,6 @@ module TestStdAlgorithm() {
   // transform2 = function(v1, v2, binary_op, first1=0, last1, first2=0, d=[], d_first=0)
   // generate = function(g, v=[], first=0, last)
   // generate_n = function(count, g, v=[], first=0)
-  
 
   // remove (v, value, first=0, last)
   let(v=[0,1,2,3,4,5,6,7,8,9]) {
@@ -200,6 +202,9 @@ module TestStdAlgorithm() {
   // TODO ...
   // replace_copy = function (v, old_value, new_value, first=0, last, d=[], d_first=0, cmp=eq)
   // replace_copy_if = function (v, p, new_value, first=0, last, d=[])
+  // (N/A) swap
+  // swap_ranges = function(v1, v2, first1=0, last1, first2=0)
+  // index_swap = function(v_a, v_b, a_i, b_i)
 
   // reverse (v, first=0, last)
   Test(reverse([0,1,2,3,4,5,6,7,8,9]), [9,8,7,6,5,4,3,2,1,0]);
@@ -214,13 +219,46 @@ module TestStdAlgorithm() {
   // move elements [8,12) to position 3: https://www.youtube.com/watch?v=W2tWOdzgXHA&feature=youtu.be&t=645
   Test(std_rotate([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],3,8,12), [0,1,2,8,9,10,11,3,4,5,6,7,12,13,14,15]); 
 
+  // TODO
+  // std_rotate_copy = function(v, d, first=0, n_first, last, d_first=0)
+
   // unique (v, first=0, last, cmp=eq)
   Test(unique(insertv_sorted([],[1,2,3,1,2,3,3,4,5,4,5,6,7])), [1,2,3,4,5,6,7]);
 
   // stable_partition (v, first=0, last, p)
   let(is_even = function(x)x%2==0) {
-    Test(stable_partition([0,1,2,3,4,5,6,7,8,9],p=is_even), [0,2,4,6,8,1,3,5,7,9]);
+    Test(stable_partition([0,1,2,3,4,5,6,7,8,9],is_even), [0,2,4,6,8,1,3,5,7,9]);
   }
+
+  Test(unique(insertv_sorted([],[1,2,3,1,2,3,3,4,5,4,5,6,7])), [1,2,3,4,5,6,7]);
+
+  let(v1=[],
+    v2=[0],
+    v3=[undef],
+    v4=[1,2,3,4,5,67,43],
+    v5=[100,99,98],
+    v6=[0,1,2,3,4,4,3,2,1]
+  ) { 
+
+    // is_sorted (v, first=0, last, cmp=lt)
+    Test(is_sorted(v1), true);
+    Test(is_sorted(v2), true);
+    Test(is_sorted(v3), true);
+    Test(is_sorted(v4), false);
+    Test(is_sorted(v5), false);
+    Test(is_sorted(v6), false);
+
+    // is_sorted_until (v, first=0, last, cmp=lt)
+    Test(is_sorted_until(v1), 0);
+    Test(is_sorted_until(v2), 1);
+    Test(is_sorted_until(v3), 1);
+    Test(is_sorted_until(v4), 6);
+    Test(is_sorted_until(v5), 1);
+    Test(is_sorted_until(v6), 6);
+  }
+
+  // merge_sort = function(v,first=0,last,cmp=lt)
+
 
   // upper_bound (v, value, first=0, last=undef, cmp=lt)
   // lower_bound (v, value, first=0, last=undef, cmp=lt)
@@ -238,36 +276,59 @@ module TestStdAlgorithm() {
     for (x=v2) Test(binary_search(v2, x), true);  
     for (x=v2) Test(binary_search(v1, x), false); // do not contain each other's elements
     for (x=v1) Test(binary_search(v2, x), false);
+
+    Test(binary_search([],[]), false);
+    Test(binary_search([ [] ],[]), true);
+    Test(binary_search([],true), false);
+    Test(binary_search([undef],undef), true);
+    //  Can't really compare undef with other objects, see OpenSCAD Github Issue #3165
+    //Test(binary_search([undef], 0), false);
+    //Test(binary_search([0], undef), false);
   }
 
-  Test(binary_search([],[]), false);
-  Test(binary_search([ [] ],[]), true);
-  Test(binary_search([],true), false);
+  // TODO 
+  // merge (v1, v2, first1=0, last1, first2=0, last2)
 
-  Test(binary_search([undef],undef), true);
+  let(v1=[1,2,3,4,5,6,7,8,9,10],
+      v2=[2,4,6,8,10],
+      v3=[1,3,5,7,9],
+      v4=[11,12,13,14,15],
+      v5=[],
+      v6=[0]) {
+    inplace_test = function(v1,v2) inplace_merge(concat(v1,v2), 0, len(v1), len(v1)+len(v2));
 
-  //  Can't really compare undef with other objects, see OpenSCAD Github Issue #3165
-  //Test(binary_search([undef], 0), false);
-  //Test(binary_search([0], undef), false);
+    Test(inplace_test(v1,v1), [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]);
+    Test(inplace_test(v1,v2), [1,2,2,3,4,4,5,6,6,7,8,8,9,10,10]);
+    Test(inplace_test(v1,v3), [1,1,2,3,3,4,5,5,6,7,7,8,9,9,10]);
+    Test(inplace_test(v1,v4), concat(v1,v4));
+    Test(inplace_test(v4,v1), concat(v1,v4));
+    Test(inplace_test(v1,v5), v1);
+    Test(inplace_test(v1,v6), concat(v6,v1));
+    Test(inplace_test(v6,v1), concat(v6,v1));
+    Test(inplace_test(v2,v3), v1);
+    Test(inplace_test(v3,v2), v1);
+  }
 
-  // Example compare by index
   // max (a, b, cmp=lt)
-  Test(max([100,1],[-100,2],function(a,b) a[0]<b[0]), [100,1]);
-  Test(max([100,1],[-100,2],function(a,b) a[1]<b[1]), [-100,2]);
   // min (a, b, cmp=lt)
-  Test(min([100,1],[-100,2],function(a,b) a[0]<b[0]), [-100,2]);
-  Test(min([100,1],[-100,2],function(a,b) a[1]<b[1]), [100,1]);
+  // Example compare by index
+  Test(std_max([100,1],[-100,2],function(a,b) a[0]<b[0]), [100,1]);   
+  Test(std_max([100,1],[-100,2],function(a,b) a[1]<b[1]), [-100,2]);
+  Test(std_min([100,1],[-100,2],function(a,b) a[0]<b[0]), [-100,2]);
+  Test(std_min([100,1],[-100,2],function(a,b) a[1]<b[1]), [100,1]);
   // return first when "equivalent"
-  Test(max([1,2,3],[3,2,1],function(a,b) a[1]<b[1]), [1,2,3]);
-  Test(min([1,2,3],[3,2,1],function(a,b) a[1]<b[1]), [1,2,3]);
+  Test(std_max([1,2,3],[3,2,1],function(a,b) a[1]<b[1]), [1,2,3]);
+  Test(std_min([1,2,3],[3,2,1],function(a,b) a[1]<b[1]), [1,2,3]);
 
-  // max_element (v, first=0, last, cmp=lt)
-  // min_element (v, first=0, last, cmp=lt)
+
   let(v= [0,1,2,3,4,5,6,7,8,9,8,7,6,5,4,3,2,1,0,9]) {
-    Test(min_element(v), 0);
-    Test(min_element(v,10), 18);
+    // max_element (v, first=0, last, cmp=lt)
     Test(max_element(v), 9);
     Test(max_element(v,10), 19);
+
+    // min_element (v, first=0, last, cmp=lt)
+    Test(min_element(v), 0);
+    Test(min_element(v,10), 18);
   }
   
   // minmax (a, b, cmp=lt)

@@ -42,7 +42,7 @@ Status      | Description
 :heavy_check_mark: | copy
 :heavy_check_mark: | copy_if | copies a range of elements to a new location
 :heavy_check_mark: | copy_n | copies a number of elements to a new location
-:x: | copy_backward | copies a range of elements in backwards order
+:heavy_check_mark: | copy_backward | copies a range of elements in backwards order
 :x:<sup>[1](#note1)</sup> | move | moves a range of elements to a new location
 :x:<sup>[1](#note1)</sup> | move_backward | moves a range of elements to a new location in backwards order
 :heavy_check_mark: | fill | copy-assigns the given value to every element in a range
@@ -59,16 +59,16 @@ Status      | Description
 :heavy_check_mark: | replace_if | replaces all values satisfying specific criteria with another value
 :heavy_check_mark: | replace_copy
 :heavy_check_mark: | replace_copy_if | copies a range, replacing elements satisfying specific criteria with another value
-:question: | swap | swaps the values of two objects
-:question: | swap_ranges | swaps two ranges of elements
-:question: | iter_swap | swaps the elements pointed to by two iterators
+:x: | swap | swaps the values of two objects
+:heavy_check_mark: | swap_ranges | swaps two ranges of elements
+:heavy_check_mark: | iter_swap | swaps the elements pointed to by two iterators
 :heavy_check_mark: | reverse | reverses the order of elements in a range
 :heavy_check_mark: | reverse_copy | creates a copy of a range that is reversed
 :heavy_check_mark: | rotate | rotates the order of elements in a range
-:white_check_mark: | rotate_copy | copies and rotate a range of elements
-:white_check_mark: | shift_left
-:white_check_mark: | shift_right | shifts elements in a range
-:white_check_mark: | random_shuffle
+:heavy_check_mark: | rotate_copy | copies and rotate a range of elements
+:question: | shift_left
+:question: | shift_right | shifts elements in a range
+:x: | random_shuffle
 :white_check_mark: | shuffle | randomly re-orders elements in a range
 :white_check_mark: | sample | selects n random elements from a sequence
 :heavy_check_mark: | unique | removes consecutive duplicate elements in a range
@@ -79,9 +79,9 @@ Status      | Description
 **Status** | **Function Name** | **Description**
 ---------- | ----------------- | --------------- 
 :white_check_mark: | is_partitioned | determines if the range is partitioned by the given predicate
-:heavy_check_mark: | partition | divides a range of elements into two groups
+:x:<sup>[2](#note2)</sup> | partition | divides a range of elements into two groups
 :white_check_mark: | partition_copy | copies a range dividing the elements into two groups
-:x:<sup>[2](#note2)</sup> | stable_partition | divides elements into two groups while preserving their relative order
+:heavy_check_mark: | stable_partition | divides elements into two groups while preserving their relative order
 :white_check_mark: | partition_point | locates the partition point of a partitioned range
 
 ## Sorting operations
@@ -206,10 +206,10 @@ Status      | Description
 
  | Count | Type                | 
  | -----:| ------------------- |
- |    48 | **DONE**            |
- |    38 | **TODO**            |
- |    18 | **Not Applicable**  |
- |    13 | **Unsure**          |
+ |    52 | **DONE**            |
+ |    34 | **TODO**            |
+ |    19 | **Not Applicable**  |
+ |    12 | **Unsure**          |
  |   117 | **Total STL algos** |
  |     3 | **Bonus**           |
 

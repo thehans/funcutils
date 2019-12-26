@@ -40,7 +40,7 @@ echo(filter([1,[],2,3,4,5,undef,"no"];, function(x) is_num(x))); // result: [1,2
    - Minimal collection of common higher-order functions: `map`, `filter`, `fold`
  - <a href="#ops">ops.scad</a>
    - Elementary function literals for comparison, arithmetic and boolean value operations.
- - <a href="#std">std.scad</a>
+ - <a href="#std_algorithm">std_algorithm.scad</a>
    - Functions modeled after [C++ STL Algorithms](https://en.cppreference.com/w/cpp/algorithm) mostly operating on ranges of sequences (lists/vectors or strings)
  - <a href="#list">list.scad</a>
    - Various list-based functions which are *not* directly modeled after C++ STL algorithms.
@@ -58,7 +58,7 @@ So, if including top-level `functils.scad`, then do not include *any* others.
  - [funcutils.scad](#funcutils)
    - [list.scad](#list)
      - [types.scad](#types)
-     - [std.scad](#std)
+     - [std_algorithm.scad](#std_algorithm)
        - [ops.scad](#ops)
    - [func.scad](#func)
    - [string.scad](#string)
@@ -165,8 +165,8 @@ echo(insertv_sorted([],[for (x=rands(0,10000,10000)) floor(x)]));
    -  unnamed range may be optionally positioned in place of `begin`
 
 
-<a name="std"></a>
-# std.scad
+<a name="std_algorithm"></a>
+# std_algorithm.scad
 **Functions modeled after [C++ STL Algorithms](https://en.cppreference.com/w/cpp/algorithm) (incomplete, see [std algorithm status](std_algorithm_status.md) for details)**
 
 :information_source: Where C++ uses `first` and `last` *iterators* for most of the following functions, OpenSCAD uses *indices* of the same name.  This results in some differences between function signatures including:

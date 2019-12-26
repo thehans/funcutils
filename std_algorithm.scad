@@ -32,7 +32,7 @@ for_each = function(v, f, first=0, last)
 
 // similar to for_each but returns (first+n)
 for_each_n = function(v, f, first=0, n)
-  let(dummy2=[for(i=[first:1:first+n-1]) let(dummy1=f(v[i])) if(false) undef])
+  let(dummy2=[ for(i=[first:1:first+n-1]) let(dummy1=f(v[i])) if(false) undef ])
   first+n;
 
 // for_each[_n] module maybe slightly more useful, putting result of f into $each variable,
@@ -54,7 +54,7 @@ count_if = function (v, p, first=0, last)
 mismatch = function (v1, first1=0, last1, v2, first2=0, last2, cmp=eq)
   let(l1 = end(v1,last1), l2 =  end(v2,last2),
     imax = min(l1-first1, l2-first2),
-    f=function (i) (i>=imax || !cmp(v1[first1+i],v2[first2+i])) ? (i<imax ? [first1+i,first2+i] : [first1+imax,first2+imax]) : f(i+1) )
+    f=function (i) (i>=imax || !cmp(v1[first1+i],v2[first2+i])) ? (i<imax ? [first1+i,first2+i] : [first1+imax,first2+imax]) : f(i+1))
   assert(first1<=l1) assert(first2<=l2)
   f(0);
 
@@ -74,16 +74,16 @@ find = function(v, value, first=0, last, cmp=eq)
   find_if(v,function(x)cmp(value,x),first,last);
 
 find_end = function(v, s_v, first=0, last, s_first=0, s_last, cmp=eq)
-  let( l=end(v,last), sl=end(s_v,s_last)-1,
+  let(l=end(v,last), sl=end(s_v,s_last)-1,
     _f=function(i, j) (j < s_first ? i+1 : (i < first ? l :
-      (cmp(v[i],s_v[j]) ? _f(i-1,j-1) : _f(i+sl-j-1, sl)))) )
+      (cmp(v[i],s_v[j]) ? _f(i-1,j-1) : _f(i+sl-j-1, sl)))))
   _f(l-1, sl);
 
 find_first_of = function(v, s_v, first=0, last, s_first=0, s_last, cmp=eq)
   find_if(v,function(x)contains(s_v,x,s_first,s_last),first,last);
 
 adjacent_find = function(v, first=0, last, cmp=eq)
-  let( l=end(v,last), _a=function(f) l-f>1 && !cmp(v[f],v[f+1]) ? _a(f+1) : (l-f>1 ? f : l) )
+  let(l=end(v,last), _a=function(f) l-f>1 && !cmp(v[f],v[f+1]) ? _a(f+1) : (l-f>1 ? f : l))
   _a(first);
 
 std_search = function(v, s_v, first=0, last, s_first=0, s_last, cmp=eq)
@@ -94,7 +94,7 @@ std_search = function(v, s_v, first=0, last, s_first=0, s_last, cmp=eq)
 
 search_n = function(v, count, value, first=0, last, cmp=eq)
   let(l=end(v,last), _s=function(i,j) (j>=count ? i-count : (i == l ? l :
-    (cmp(v[i],value) ? _s(i+1,j+1) : _s(i+1,0) ))))
+    (cmp(v[i],value) ? _s(i+1,j+1) : _s(i+1,0)))))
   _s(first,0);
 
 // *****************************
@@ -118,7 +118,12 @@ copy_if = function(v, p, first=0, last, d=[], d_first=0)
 copy_n = function(v, count, first=0, d=[], d_first=0)
   copy(v, first, first+count, d, d_first);
 
-//(N/A) copy_backward | copies a range of elements in backwards order
+copy_backward = function(v, first=0, last, d=[], d_last)
+  let(l=end(v,last), dl=end(d,d_last))
+  [ for(i=[0:1:dl-l+first-1]) d[i],
+    for(i=[first:1:l-1]) v[i],
+    for(i=[dl:1:end(d)-1]) d[i] ];
+
 //(N/A) move | moves a range of elements to a new location
 //(N/A) move_backward | moves a range of elements to a new location in backwards order
 
@@ -189,9 +194,15 @@ replace_copy_if = function (v, p, new_value, first=0, last, d=[])
     for(i=[first:1:l-1]) p(v[i]) ? new_value : v[i],
     for(i=[d_first+l-first:1:end(d)-1]) d[i] ];
 
-//(Unsure) swap | swaps the values of two objects
-//(Unsure) swap_ranges | swaps two ranges of elements
-//(Unsure) iter_swap | swaps the elements pointed to by two iterators
+//(N/A) swap | swaps the values of two objects
+
+swap_ranges = function(v1, v2, first1=0, last1, first2=0)
+  let(l1=end(v1,last1))
+  [ copy(v2, first2, first2+l1-first1, v1, first1),
+    copy(v1, first1, l1, v2, first2) ];
+    
+index_swap = function(v_a, v_b, a_i, b_i)
+  swap_ranges(v_a, v_b, a_i, a_i+1, b_i);
 
 reverse = function (v, first=0, last)
   let(l=end(v,last))
@@ -205,21 +216,33 @@ reverse_copy = function (v, d, first=0, last, d_first)
     for(i=[l-1:-1:first]) v[i],
     for(i=[d_first+l-first:1:len(d)-1]) d[i] ];
 
-std_rotate = function(v, first=0, first_n, last)
+std_rotate = function(v, first=0, n_first, last)
   let(l=end(v,last))
   [ for(i=[0:1:first-1]) v[i],
-    for(i=[first_n:1:l-1]) v[i],
-    for(i=[first:1:first_n-1]) v[i],
+    for(i=[n_first:1:l-1]) v[i],
+    for(i=[first:1:n_first-1]) v[i],
     for(i=[l:1:len(v)-1]) v[i] ];
 
-//TODO: rotate_copy | copies and rotate a range of elements
+std_rotate_copy = function(v, d, first=0, n_first, last, d_first=0)
+  let(l=end(v,last))
+  [ for(i=[0:1:d_first-1]) d[i],
+    for(i=[0:1:first-1]) v[i],
+    for(i=[n_first:1:l-1]) v[i],
+    for(i=[first:1:n_first-1]) v[i],
+    for(i=[l:1:len(v)-1]) v[i],
+    for(i=[d_first+last-first:1:end(d)]) d[i] ];
+    
+//(Unsure): shift_left
+//(Unsure): shift_right | shifts elements in a range
+//(N/A): random_shuffle
 
-
-//TODO: shift_left
-//TODO: shift_right | shifts elements in a range
-//TODO: random_shuffle
 //TODO: shuffle | randomly re-orders elements in a range
+//shuffle = function(v, rand, first=0, last)
+// rands(min, max, count, seed)
+
 //TODO: sample | selects n random elements from a sequence
+
+
 
 unique = function(v, first=0, last, cmp=eq)
   let(l=end(v,last))
@@ -234,7 +257,7 @@ unique = function(v, first=0, last, cmp=eq)
 
 //TODO: is_partitioned | determines if the range is partitioned by the given predicate
 
-stable_partition = function(v, first=0, last, p)
+stable_partition = function(v, p, first=0, last)
   let(l=end(v,last))
   [ for(i=[0:1:first-1]) v[i],
     for(i=[first:1:l-1]) if(p(v[i])) v[i],
@@ -250,9 +273,18 @@ stable_partition = function(v, first=0, last, p)
 // Sorting operations
 // ******************
 
-//TODO: is_sorted | checks whether a range is sorted into ascending order
-//TODO: is_sorted_until | finds the largest sorted subrange
-//TODO: sort | sorts a range into ascending order
+is_sorted = function(v, first=0, last, cmp=lt)
+  let(l=end(v,last))
+  is_sorted_until(v,first,l)==l;
+
+is_sorted_until = function(v, first=0, last, cmp=lt)
+  let(l=end(v,last), su = function(i) i==l || cmp(v[i],v[i-1]) ? i : su(i+1))
+  l-first>1 ? su(first+1) : l;
+
+sort = function(v,first=0,last,cmp=lt)
+  let(l=end(v,last), ms = function(f,l) let(d=l-f) d>2 ? let(m=floor((f+l)/2)) merge(ms(f,m),ms(m,l),cmp=cmp) : (d==2 ? minmax(v[f],v[f+1],cmp) : [v[f]]))
+  l-first>0 ? ms(first,l) : [];  
+
 //TODO: partial_sort | sorts the first N elements of a range
 //(N/A) partial_sort_copy | copies and partially sorts a range of elements
 //(Unsure) stable_sort | sorts a range of elements while preserving order between equal elements
@@ -288,8 +320,15 @@ binary_search = function (v, value, first=0, last, cmp=lt)
 // Other operations on sorted ranges
 // *********************************
 
-//TODO: merge | merges two sorted ranges
-//(Unsure) inplace_merge | merges two ordered ranges in-place
+
+// TODO: add d, d_first
+merge = function(v1, v2, first1=0, last1, first2=0, last2, cmp=lt)
+  let(l1=end(v1,last1), l2=end(v2,last2), fc = function(i,j) (i<l1 ? (j<l2 ? cmp(v1[i],v2[j]) : true) : false) )
+  [ for(i=first1,j=first2,t=fc(i,j); i<l1 || j<l2; i=t?i+1:i,j=t?j:j+1,t=fc(i,j)) t ? v1[i] : v2[j] ];
+
+inplace_merge = function(v, first, middle, last, cmp=lt)
+  let(fc = function(i,j) (i<middle ? (j<last ? cmp(v[i],v[j]) : true) : false) )
+  [ for(i=first,j=middle,t=fc(i,j); i<middle || j<last; i=t?i+1:i,j=t?j:j+1,t=fc(i,j)) v[t?i:j] ];
 
 
 // *********************************
@@ -307,19 +346,30 @@ binary_search = function (v, value, first=0, last, cmp=lt)
 // Heap operations
 // ***************
 
-//(Unsure) is_heap | checks if the given range is a max heap
-//(Unsure) is_heap_until | finds the largest subrange that is a max heap
-//(Unsure) make_heap | creates a max heap out of a range of elements
+is_heap = function(v, first=0, last, cmp=lt)
+  let(l=end(v,last))
+  is_heap_until(v,first,l,cmp)==l;
+
+is_heap_until = function(v, first=0, last, cmp=lt)
+  let(f=first,l=end(v,last),e=ceil((l-f)/2),
+    ih = function(i) let(n=v[i+f],li=f+i*2+1,ri=li+1) !((ri<l && cmp(n,v[ri])) || (li<l && cmp(n,v[li]))),
+    hu = function(i=0) i<e && ih(i) ? hu(i+1) : min(f+i*2+2,l) )
+    hu();
+
+//make_heap = function(v, first=0, last)
+//  let(l=end(v,last))
+//  [ for(i=[first:1:l]) x];
 //(Unsure) push_heap | adds an element to a max heap
-//(Unsure) pop_heap | removes the largest element from a max heap
-//(Unsure) sort_heap | turns a max heap into a range of elements sorted in ascending order
+//pop_heap = function(v, first=0, last)
+//  let(f=first,l=end(v,last),e=ceil((l-f)/2),
+//sort_heap = 
 
 
 // **************************
 // Minimum/maximum operations
 // **************************
 
-max = function(a, b, cmp=lt)
+std_max = function(a, b, cmp=lt)
   cmp(a,b) ? b : a;
 
 max_element = function(v, first=0, last, cmp=lt)
@@ -327,19 +377,20 @@ max_element = function(v, first=0, last, cmp=lt)
     m_e = function (i, m) i < l ? m_e(i+1, cmp(v[m], v[i]) ? i : m) : m)
   first < l ? m_e(first+1, first) : l;
 
-min = function(a, b, cmp=lt)
+std_min = function(a, b, cmp=lt)
   cmp(b,a) ? b : a;
 
 min_element = function(v, first=0, last, cmp=lt)
   let(l = end(v,last),
-  m_e = function (i, m) i < l ? m_e(i+1, cmp(v[i], v[m]) ? i : m) : m)
+    m_e = function (i, m) i < l ? m_e(i+1, cmp(v[i], v[m]) ? i : m) : m)
   first < l ? m_e(first+1, first) : l;
 
 minmax = function(a, b, cmp=lt)
   cmp(b,a) ? [b,a] : [a,b];
 
-minmax_element = function(v, first=0, last, cmp=lt) let(l = end(v,last),
-  mm_e = function (i, mm) i < l ? mm_e(i+1, [cmp(v[i],v[mm[0]]) ? i : mm[0], cmp(v[i],v[mm[1]]) ? mm[1] : i ]) : mm)
+minmax_element = function(v, first=0, last, cmp=lt) 
+  let(l = end(v,last),
+    mm_e = function (i, mm) i < l ? mm_e(i+1, [cmp(v[i],v[mm[0]]) ? i : mm[0], cmp(v[i],v[mm[1]]) ? mm[1] : i ]) : mm)
   first < l ? mm_e(first+1, [first,first]) : [l,l];
 
 clamp = function (x,lo,hi,cmp=lt)

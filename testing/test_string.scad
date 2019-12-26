@@ -4,6 +4,8 @@ include <utils_testing.scad>
 // TODO some string tests still missing.
 
 module TestString() {
+  echo("Testing string.scad");
+  
   s = "The quick brown fox jumps over the lazy dog.";
   // split on words
   Test(split(s), ["The", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog."]);
