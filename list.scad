@@ -49,23 +49,17 @@ slice = function (v, begin, step, end, range)
 pairs = function(v) len(v) < 2 ? [] :
   [for (i=[0:len(v)-2]) [v[i], v[i+1]]];
 
-zip = function(v1, v2) let(
-    last = min(len(v1), len(v2))-1
-  )
-  last < 0 ? [] :
-  [for (i=[0:last]) [v1[i], v2[i]]];
 
-zip3 = function(v1, v2, v3) let(
-    last = min(min(len(v1), len(v2)), len(v3))-1
+ziparr = function(varr) let(
+    last = min([for (v=varr) len(v)-1])
   )
-  last < 0 ? [] :
-  [for (i=[0:last]) [v1[i], v2[i], v3[i]]];
+  [for (i=[0:last]) [for (v=varr) v[i]]];
 
-zip4 = function(v1, v2, v3, v4) let(
-    last = min(min(len(v1), len(v2)), min(len(v3), len(v4)))-1
-  )
-  last < 0 ? [] :
-  [for (i=[0:last]) [v1[i], v2[i], v3[i], v4[i]]];
+zip = function(v1, v2, v3=undef, v4=undef, v5=undef)
+  !is_undef(v5) ? ziparr([v1, v2, v3, v4, v5]) :
+  !is_undef(v4) ? ziparr([v1, v2, v3, v4]) :
+  !is_undef(v3) ? ziparr([v1, v2, v3]) :
+  ziparr([v1, v2]);
 
 select_mask = function(v, mask)
   [for (p=zip(v, mask)) if (p[1]) p[0]];
