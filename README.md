@@ -28,7 +28,7 @@ Currently OpenSCAD's builtin functions are not available directly as literals (t
 
 Example:
 ```
-echo(filter([1,[],2,3,4,5,undef,"no"];, function(x) is_num(x))); // result: [1,2,3,4,5]
+echo(filter([1,[],2,3,4,5,undef,"no"], function(x) is_num(x))); // result: [1,2,3,4,5]
 ```
 
 ## API Reference 
