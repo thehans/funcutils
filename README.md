@@ -1,17 +1,19 @@
 # OpenSCAD Functional Programming Utilities
 
-This library is a collection of [OpenSCAD](http://www.openscad.org) functions for use with the **function-literals** *experimental* feature.
+This library is a collection of [OpenSCAD](http://www.openscad.org) functions for use with OpenSCAD **[function-literals](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/User-Defined_Functions_and_Modules#Function_Literals)**.
 
 It is meant to provide algorithms and tools to help build efficient scripts using functional programming techniques in OpenSCAD.
 
-:warning: - Only OpenSCAD **[Development Snapshots](http://www.openscad.org/downloads.html#snapshots)** or **Nightly** builds come with experimental features enabled, and must be newer than **Oct. 23 2019** when **function-literals** was merged into OpenSCAD master.
+This was started as somewhat of an experiment or coding exercise to see how well various general algorithms could be implemented and built upon in the OpenSCAD language.  The [C++ standard algorithms library](https://en.cppreference.com/w/cpp/algorithm) was chosen as a model for most of **funcutils** API.  An attempt was made to support as much of the C++ API as possible, although due to language differences some of these functions may be decidedly less useful or practical within OpenSCAD.
 
-:warning: - Additionally, the feature must be enabled within OpenSCAD by checking the option under **Preferences -> Features -> function-literals**
+In addition to <a href="#std_algorithm">std_algorithm.scad</a>, various other utilities have been provided which the authors felt were particularly useful for OpenSCAD.
 
-:warning: - If building [OpenSCAD from source](https://github.com/openscad/openscad#building-openscad), the experimental features must be enabled during build configuration:
-   - Using qmake (primary method): `qmake CONFIG+=experimental [...]`
-   - Using cmake (alternative): `cmake -DEXPERIMENTAL=ON [...]`
+:warning: - Only [OpenSCAD Release 2021.01](http://openscad.org/news.html#20210131) or later has builtin support for function-literals.
 
+:information_source: - Prior to release 2021.01, function-literals were available as an **experimental feature**, accessible from [Development Snapshots](http://www.openscad.org/downloads.html#snapshots) and Nightly Builds.
+  - Such builds must be newer than **Oct. 23 2019** when **function-literals** was merged into OpenSCAD master.
+  - If build is from sources between 2019.10.23 and 2021.01 Release, then the feature must be enabled within OpenSCAD by checking the option under **Preferences -> Features -> function-literals**.
+  - If built from sources from the above date range, then experimental features must be enabled in the build config e.g.: `cmake -DEXPERIMENTAL=ON  [...]`  (pre-built Development Snapshots and Nightlies from OpenSCAD  all have this configuration enabled)
 
 ## General Usage
 
@@ -41,7 +43,7 @@ echo(filter([1,[],2,3,4,5,undef,"no"], function(x) is_num(x))); // result: [1,2,
  - <a href="#ops">ops.scad</a>
    - Elementary function literals for comparison, arithmetic and boolean value operations.
  - <a href="#std_algorithm">std_algorithm.scad</a>
-   - Functions modeled after [C++ STL Algorithms](https://en.cppreference.com/w/cpp/algorithm) mostly operating on ranges of sequences (lists/vectors or strings)
+   - Functions modeled after [C++ Algorithms](https://en.cppreference.com/w/cpp/algorithm) standard library, mostly operating on ranges of sequences (lists/vectors or strings)
  - <a href="#list">list.scad</a>
    - Various list-based functions which are *not* directly modeled after C++ STL algorithms.
  - <a href="#string">string.scad</a>
