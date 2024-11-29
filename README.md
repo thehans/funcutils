@@ -46,6 +46,8 @@ echo(filter([1,[],2,3,4,5,undef,"no"], function(x) is_num(x))); // result: [1,2,
    - Functions modeled after [C++ Algorithms](https://en.cppreference.com/w/cpp/algorithm) standard library, mostly operating on ranges of sequences (lists/vectors or strings)
  - <a href="#list">list.scad</a>
    - Various list-based functions which are *not* directly modeled after C++ STL algorithms.
+ - <a href="#math">math.scad</a>
+   - Mathematical functions which are *not* directly modeled after C++ STL algorithms.
  - <a href="#string">string.scad</a>
    - String specific functions
  - <a href="#types">types.scad</a>
@@ -62,6 +64,7 @@ So, if including top-level `functils.scad`, then do not include *any* others.
      - [types.scad](#types)
      - [std_algorithm.scad](#std_algorithm)
        - [ops.scad](#ops)
+     - [math.scad](#math)
    - [func.scad](#func)
    - [string.scad](#string)
 
