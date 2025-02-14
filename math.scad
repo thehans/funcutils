@@ -7,8 +7,8 @@ function _integral_rec(v, sum=0, i=0, arr=[]) = (i == len(v)) ? arr :
   let(
     nsum = sum + v[i]
   )
-  _integral_rec(v, nsum, i+1, concat(arr, nsum));
-integral = function (v) _integral_rec(v);
+  _integral_rec(v, nsum, i+1, [each arr, nsum]);
+integral = function (v) len(v)<1 ? [] : _integral_rec(v, v[0]-v[0]);
 
 function _sum_rec(v, first, last, sum=0) = first > last ? sum :
   _sum_rec(v, first+1, last, sum+v[first]);
