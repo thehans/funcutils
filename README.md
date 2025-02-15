@@ -168,7 +168,16 @@ echo(insertv_sorted([],[for (x=rands(0,10000,10000)) floor(x)]));
    - all params after `v` are optional
    - `range` param overrides others
    -  unnamed range may be optionally positioned in place of `begin`
-
+ - `parse_array (s)`
+   - parse a string into a multidimensional array containing floats.
+   - throws an assertion if the string can't be parsed
+   - whitespace characters (whitespace, newline, tab) are ignored
+```
+echo(parse_array("[1,2,3]));
+echo(parse_array("[]"));
+echo(parse_array("[[2.3]]"));
+echo(parse_array("[4.5, [2, 1], 3.2]"));
+```
 
 <a name="std_algorithm"></a>
 # std_algorithm.scad
@@ -406,4 +415,3 @@ for (
   if (is_range(x)) echo(str("is_range(",x,") = true"));
 }
 ```
-

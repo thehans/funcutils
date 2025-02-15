@@ -1,5 +1,7 @@
 include <types.scad>
 include <std_algorithm.scad>
+include <string.scad>
+
 //  Dependencies included by std_algorithm.scad:
 //    include <ops.scad>
 
@@ -72,3 +74,70 @@ shuffle = function(arr) len(arr) <= 1 ? arr :
   )
   concat(shuffle(left), shuffle(right));
 
+parse_array_rec = function(string, i=0, number_string="", current_array=[])
+    assert((string[i] >= "0" && string[i] <= "9") || (string[i] == ",") || (string[i] == ".") || (string[i] == "[") || (string[i] == "]") || (string[i] == "-"))
+    (
+        (string[i] == "[") ? (
+            concat(current_array, 
+            parse_array_rec(string, i=i + 1,
+                              number_string="", current_array=[]))
+        ) : (
+            (string[i] == "]") ? (
+                (i + 1 < len(string)) ? (
+                    (len(number_string) > 0) ? (
+                        parse_array_rec(
+                            string,
+                            i=i + 1,
+                            number_string="",
+                            current_array=[concat(current_array, [float(number_string)])]
+                        )
+                    ) : (
+                        parse_array_rec(
+                            string, i=i + 1, number_string="", current_array=[current_array]
+                        )
+                    )
+                ) : (
+                    (len(number_string) > 0) ? (
+                        concat(current_array, [float(number_string)])
+                    ) : (
+                        current_array
+                    )
+                )
+            ) : (
+                ((string[i] >= "0" && string[i] <= "9") || string[i] == "." || string[i] == "-") ? (
+                    parse_array_rec(
+                        string,
+                        i=i + 1,
+                        number_string=str(number_string, string[i]),
+                        current_array=current_array
+                    )
+                ) : (
+                    (string[i] == ",") ? (
+                        (len(number_string) > 0) ? (
+                            parse_array_rec(
+                                string,
+                                i=i + 1,
+                                number_string="",
+                                current_array=concat(current_array,
+                                [float(number_string)])
+                            )
+                        ) : (
+                            parse_array_rec(
+                                string,
+                                i=i + 1,
+                                number_string="",
+                                current_array=current_array
+                            )
+                        )
+                    ) : (
+                        undef
+                    )
+                )
+            )
+        )
+    )
+;
+
+
+parse_array = function(string)
+  parse_array_rec(join(split(join(split(join(split(string, " ")), "\n")), "\t")));
